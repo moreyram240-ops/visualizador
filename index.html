@@ -36,7 +36,11 @@
    MODO CLARO — Amanecer Cálido (#ff9966)
    ============================================================ */
 
-html[data-theme="light"] {
+html[data-theme="light"] select option {
+  background: #ffd5b5 !important;   /* durazno claro */
+  color: #3a1a17 !important;        /* texto oscuro */
+}
+
   --bg: #ff9966;               
   --panel: #ffe2c8;            
   --panel-glass: rgba(255, 255, 255, 0.35);
@@ -163,23 +167,50 @@ label {
 }
 
 select,
-input[type="range"],
-input[type="file"] {
+/* ============================================================
+   SELECT MODERNO — mejor visibilidad + glow
+   ============================================================ */
+
+select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
+  font-size: 15px;
   border-radius: 12px;
-  border: var(--border);
-  background: var(--panel-glass);
+  border: 1px solid var(--accent);
+  background: var(--panel);
   color: var(--text);
-  backdrop-filter: blur(6px);
-  transition: var(--transition);
+  outline: none;
+  cursor: pointer;
+
+  /* Sombra suave */
+  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+
+  /* Animación */
+  transition: 
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
 }
 
-select:hover,
-input[type=range]:hover,
-input[type=file]:hover {
+/* Hover */
+select:hover {
+  border-color: var(--accent2);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Enfoque (cuando haces click) */
+select:focus {
   border-color: var(--accent);
-  box-shadow: var(--accent-glow);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* Opciones internas del menú */
+select option {
+  background: var(--panel);
+  color: var(--text);
+  padding: 10px;
+}
+
 }
 
 /* ============================================================
