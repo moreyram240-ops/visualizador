@@ -8,9 +8,9 @@ def init(vals):
     global items, n
     items = list(vals)
     n = len(items)
-    # inicializar punteros/estado
+    # Inicializar punteros/estado si se necesitan
 
 def step():
-    # implementar un micro-paso y devolver:
+    # Debe devolver:
     # {"a": int, "b": int, "swap": bool, "done": bool}
     return {"done": True}
