@@ -56,7 +56,7 @@
     <header>Visualizador de Algoritmos</header>
 
     <div id="controls">
-        <select id="algorithm">
+        <select id="algorithms">
             <option value="bubble">Bubble</option>
             <option value="insertion">Insertion</option>
             <option value="selection">Selection</option>
@@ -106,7 +106,7 @@
         async function start() {
             running = true;
 
-            const alg = document.getElementById("algorithm").value;
+            const alg = document.getElementById("algorithms").value;
             const path = `algorithms/sort_${alg}.py`;
 
             const res = await fetch(path);
