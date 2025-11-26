@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Visualizador de Algoritmos </title>
+    <title>Visualizador de Algoritmos</title>
 
     <style>
+        /* ---------------- GENERAL ---------------- */
         body {
             background: #ff9966;
             color: #ffff00;
@@ -14,15 +15,41 @@
             padding: 0;
         }
 
+        /* ---------------- HEADER + MARQUESINA ---------------- */
         header {
             background: #663300;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
             border-bottom: 2px solid #30363d;
+            overflow: hidden;
         }
 
+        .marquee {
+            white-space: nowrap;
+            display: inline-block;
+            animation: mover 10s linear infinite,
+                       glow 2s ease-in-out infinite alternate,
+                       neon 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes mover {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px yellow; }
+            100% { text-shadow: 0 0 20px white; }
+        }
+
+        @keyframes neon {
+            0% { color: #fffacd; text-shadow: 0 0 8px #ffff66; }
+            100% { color: #ffff00; text-shadow: 0 0 20px #ffffff; }
+        }
+
+        /* ---------------- CONTROLES ---------------- */
         #controls {
             padding: 20px;
             display: flex;
@@ -31,25 +58,53 @@
             flex-wrap: wrap;
         }
 
-        select, button {
+        /* Botones y select con efecto neón */
+        button, select {
             background: #660066;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            border: 1px solid #30363d;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid #ffcc00;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 0 8px #ffcc00;
         }
 
         button:hover, select:hover {
-            background: #336666;
+            transform: scale(1.1);
+            background: #9933cc;
+            box-shadow: 0 0 15px #ffff33, 0 0 25px #ffcc00;
         }
 
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px #ffcc00 inset;
+        }
+
+        /* ---------------- CANVAS ---------------- */
         canvas {
             display: block;
             margin: 20px auto;
-            background: #cc3333;
-            border: 2px solid #30363d;
+            background: #330000;
+            border: 4px solid #ffcc00;
+            border-radius: 10px;
+            animation: glowCanvas 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowCanvas {
+            0% {
+                box-shadow:
+                    0 0 8px #ffcc00,
+                    0 0 16px #ffaa00,
+                    0 0 24px #ffff33;
+            }
+            100% {
+                box-shadow:
+                    0 0 15px #ffff33,
+                    0 0 30px #ffdd55,
+                    0 0 45px #ffee88;
+            }
         }
     </style>
 
@@ -58,7 +113,9 @@
 </head>
 
 <body>
-    <header>Visualizador de Algoritmos de Ordenamiento</header>
+    <header>
+        <div class="marquee">✨ Visualizador de Algoritmos de Ordenamiento ✨</div>
+    </header>
 
     <div id="controls">
         <select id="algorithm">
@@ -80,14 +137,13 @@
         let valores = [];
         let running = false;
         let pyodide;
-        let algoritmo;
 
         async function loadPyodideAndPackages() {
             pyodide = await loadPyodide();
         }
-
         loadPyodideAndPackages();
 
+        /* ------------ DIBUJO DE BARRAS CON COLORES ------------ */
         function draw(values) {
             const canvas = document.getElementById("canvas");
             const ctx = canvas.getContext("2d");
@@ -97,23 +153,34 @@
 
             values.forEach((value, i) => {
                 const h = value * 4;
-                ctx.fillStyle = "#000000";
+
+                /* Gradiente arcoiris suave */
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, `hsl(${i * 3}, 100%, 60%)`);
+                gradient.addColorStop(1, `hsl(${i * 3 + 40}, 100%, 30%)`);
+
+                ctx.fillStyle = gradient;
                 ctx.fillRect(i * width, canvas.height - h, width - 2, h);
             });
         }
 
+        /* ------------ GENERAR ------------ */
         function generate() {
-            valores = Array.from({ length: 150 }, () => Math.floor(Math.random() * 120 + 10));
+            valores = Array.from(
+                { length: 150 },
+                () => Math.floor(Math.random() * 120 + 10)
+            );
             draw(valores);
         }
 
+        /* ------------ INICIAR ------------ */
         async function start() {
             if (!valores.length) return;
 
             running = true;
 
-            const alg = document.getElementById("algoritmos").value;
-            const path = `algoritmos/sort_${alg}.py`;
+            const alg = document.getElementById("algorithm").value;
+            const path = `algorithms/sort_${alg}.py`;
 
             const res = await fetch(path);
             const pyScript = await res.text();
