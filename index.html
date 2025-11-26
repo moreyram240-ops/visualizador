@@ -6,65 +6,267 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Visualizador de Ordenamientos — Python externo</title>
   <style>
-/* ============================================================
-   THEME SYSTEM — Light + Dark con transición suave
-   ============================================================ */
-
 :root {
   --transition: 0.35s ease;
 
-  /* Default (Dark mode) */
-  --bg: #ff9966;
+  /* MODO OSCURO (default) — Neon Moderno */
+  --bg: #0b0f17;
   --panel: #11131f;
   --panel-glass: rgba(255, 255, 255, 0.05);
+
   --text: #e5e9f0;
   --muted: #8b9ab3;
+
   --accent: #4deaff;
   --accent2: #b37bff;
   --accent-glow: 0 0 12px rgba(77, 234, 255, 0.6);
 
-  /* Transition global */
+  --border: 1px solid rgba(255, 255, 255, 0.08);
+  --panel-shadow: 0 0 22px rgba(0,0,0,0.35);
+
   transition:
     background var(--transition),
     color var(--transition),
     border-color var(--transition),
-    box-shadow var(--transition);
+    box-shadow var(--transition),
+    background-color var(--transition);
 }
 
 /* ============================================================
-   Tema CLARO
-   Se activa cuando <html data-theme="light">
+   MODO CLARO — Amanecer Cálido (#ff9966)
    ============================================================ */
 
-html {
-  --bg: #ff9966;       
-  --panel: #ffe2d1;    
-  --panel-glass: rgba(0, 0, 0, 0.05);
-  --text: #2d1b16;     
-  --muted: #6b4c42;
+html[data-theme="light"] {
+  --bg: #ff9966;               
+  --panel: #ffe2c8;            
+  --panel-glass: rgba(255, 255, 255, 0.35);
 
-  --accent: #ffcc99;
-  --accent2: #ffb380;
-  --accent-glow: 0 0 10px rgba(255, 153, 102, 0.4);
+  --text: #4a2b20;
+  --muted: #855e52;
+
+  --accent: #ffbe99;
+  --accent2: #ff7f50;
+  --accent-glow: 0 0 12px rgba(255, 153, 102, 0.45);
+
+  --border: 1px solid rgba(120, 70, 40, 0.28);
+  --panel-shadow: 0 0 18px rgba(150, 85, 50, 0.25);
 }
 
-/* ============================================================
-   Modo automático (según el SO)
-   ============================================================ */
-
+/* Auto-dark/light desde el SO si el usuario no eligió tema */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
-    --bg: #f5f7fa;
-    --panel: #ffffff;
-    --panel-glass: rgba(0, 0, 0, 0.04);
-    --text: #1a1c1f;
-    --muted: #5c6572;
-    --accent: #009fff;
-    --accent2: #7b4dff;
-    --accent-glow: 0 0 10px rgba(0, 159, 255, 0.4);
+    --bg: #ff9966;
+    --panel: #ffe2c8;
+    --panel-glass: rgba(255, 255, 255, 0.35);
+
+    --text: #4a2b20;
+    --muted: #855e52;
+
+    --accent: #ffbe99;
+    --accent2: #ff7f50;
+    --accent-glow: 0 0 12px rgba(255, 153, 102, 0.45);
+
+    --border: 1px solid rgba(120, 70, 40, 0.28);
+    --panel-shadow: 0 0 18px rgba(150, 85, 50, 0.25);
   }
 }
 
+/* ============================================================
+   RESET Y BASE
+   ============================================================ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition: background var(--transition);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header {
+  padding: 16px 20px;
+  background: var(--panel-glass);
+  border-bottom: var(--border);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: var(--panel-shadow);
+  transition: var(--transition);
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.pill {
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  border: var(--border);
+}
+
+/* ============================================================
+   CONTENIDO
+   ============================================================ */
+main {
+  padding: 16px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+}
+
+/* Grid de controles */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 14px;
+}
+
+/* ============================================================
+   TARJETAS
+   ============================================================ */
+.card {
+  background: var(--panel);
+  border: var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--panel-shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+}
+
+/* ============================================================
+   FORMULARIOS
+   ============================================================ */
+label {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+select,
+input[type="range"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: var(--border);
+  background: var(--panel-glass);
+  color: var(--text);
+  backdrop-filter: blur(6px);
+  transition: var(--transition);
+}
+
+select:hover,
+input[type=range]:hover,
+input[type=file]:hover {
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 14px;
+  background: var(--panel);
+  color: var(--text);
+  border: var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+button:hover {
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+}
+
+button.primary {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 4px var(--accent);
+}
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+#canvasWrap {
+  background: var(--panel);
+  border: 1px dashed var(--muted);
+  border-radius: 16px;
+  padding: 12px;
+  position: relative;
+  box-shadow: var(--panel-shadow);
+  transition: var(--transition);
+}
+
+#view {
+  width: 100%;
+  height: 64vh;
+  border-radius: 10px;
+  background:
+    radial-gradient(1000px 500px at 20% -10%, rgba(255,255,255,0.08), transparent 70%),
+    radial-gradient(900px 500px at 80% 110%, rgba(0,0,0,0.06), transparent 70%),
+    var(--panel-glass);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 10px 0;
+}
+
+.kbd {
+  padding: 3px 6px;
+  background: var(--panel);
+  border: var(--border);
+  border-radius: 6px;
+  font-family: monospace;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 680px) {
+  header {
+    justify-content: center;
+    text-align: center;
+  }
+  button {
+    flex: 1 1 45%;
+  }
+  #view {
+    height: 58vh;
+  }
+}
     </style>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js" defer></script>
