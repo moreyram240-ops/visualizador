@@ -2,213 +2,116 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Algoritmos</title>
+    <title>Visualizador de Algoritmos de Ordenamiento</title>
+
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 
     <style>
-        /* ---------------- GENERAL ---------------- */
         body {
-            background: #ff9966;
-            color: #ffff00;
-            font-family: garamond, sans-serif;
+            font-family: Arial;
+            background: #f4f4f4;
             margin: 0;
-            padding: 0;
-        }
-
-        /* ---------------- HEADER + MARQUESINA ---------------- */
-        header {
-            background: #663300;
-            padding: 25px;
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            border-bottom: 2px solid #30363d;
-            overflow: hidden;
-        }
-
-        .marquee {
-            white-space: nowrap;
-            display: inline-block;
-            animation: mover 10s linear infinite,
-                       glow 2s ease-in-out infinite alternate,
-                       neon 1.5s ease-in-out infinite alternate;
-        }
-
-        @keyframes mover {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 5px yellow; }
-            100% { text-shadow: 0 0 20px white; }
-        }
-
-        @keyframes neon {
-            0% { color: #fffacd; text-shadow: 0 0 8px #ffff66; }
-            100% { color: #ffff00; text-shadow: 0 0 20px #ffffff; }
-        }
-
-        /* ---------------- CONTROLES ---------------- */
-        #controls {
             padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #controls {
             display: flex;
-            gap: 20px;
             justify-content: center;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        /* Botones y select con efecto neón */
-        button, select {
-            background: #660066;
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: 2px solid #ffcc00;
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.3s ease-in-out;
-            box-shadow: 0 0 8px #ffcc00;
+        #array {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 260px;
+            margin-top: 20px;
         }
 
-        button:hover, select:hover {
-            transform: scale(1.1);
-            background: #9933cc;
-            box-shadow: 0 0 15px #ffff33, 0 0 25px #ffcc00;
+        .bar {
+            width: 25px;
+            margin: 0 3px;
+            background: steelblue;
+            transition: 0.3s;
         }
 
-        button:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 5px #ffcc00 inset;
+        .highlight {
+            background: orange !important;
         }
 
-        /* ---------------- CANVAS ---------------- */
-        canvas {
-            display: block;
-            margin: 20px auto;
-            background: #330000;
-            border: 4px solid #ffcc00;
-            border-radius: 10px;
-            animation: glowCanvas 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glowCanvas {
-            0% {
-                box-shadow:
-                    0 0 8px #ffcc00,
-                    0 0 16px #ffaa00,
-                    0 0 24px #ffff33;
-            }
-            100% {
-                box-shadow:
-                    0 0 15px #ffff33,
-                    0 0 30px #ffdd55,
-                    0 0 45px #ffee88;
-            }
+        .swap {
+            background: red !important;
         }
     </style>
-
-    <!-- Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 </head>
-
 <body>
-    <header>
-        <div class="marquee">Visualizador de Algoritmos de Ordenamiento </div>
-    </header>
 
-    <div id="controls">
-        <select id="algorithm">
-            <option value="bubble">Bubble</option>
-            <option value="insertion">Insertion</option>
-            <option value="selection">Selection</option>
-            <option value="template">Template</option>
+    <h1>Visualizador de Algoritmos de Ordenamiento</h1>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <label>Algoritmo:</label>
+        <select id="algoritmo">
+            <option value="sort_bubble">Bubble Sort</option>
+            <option value="sort_selection">Selection Sort</option>
+            <option value="sort_insertion">Insertion Sort</option>
         </select>
 
-        <button onclick="generate()">Generar</button>
-        <button onclick="start()">Iniciar</button>
-        <button onclick="pause()">Pausar</button>
-        <button onclick="reset()">Reiniciar</button>
+        <button id="btn-iniciar">Iniciar</button>
     </div>
 
-    <canvas id="canvas" width="900" height="500"></canvas>
+    <div id="controls">
+        <button id="btn-step" disabled>Paso</button>
+        <button id="btn-auto" disabled>Auto</button>
+        <button id="btn-reset" disabled>Reset</button>
+    </div>
 
-    <script>
-        let valores = [];
-        let running = false;
-        let pyodide;
+    <div id="array"></div>
 
-        async function loadPyodideAndPackages() {
-            pyodide = await loadPyodide();
-        }
-        loadPyodideAndPackages();
+    <!-- PyScript -->
+    <py-script>
+import js
+from pyodide.http import pyfetch
+import asyncio
+import importlib
 
-        /* ------------ DIBUJO DE BARRAS CON COLORES ------------ */
-        function draw(values) {
-            const canvas = document.getElementById("canvas");
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+# Estado
+items = [30, 12, 60, 22, 5, 50, 41, 33]
+alg = None
+auto_running = False
 
-            const width = canvas.width / values.length;
+# -------------------------
+# Cargar y dibujar barras
+# -------------------------
+def render_array(a, highlight=None, swap=False):
+    container = js.document.getElementById("array")
+    container.innerHTML = ""
 
-            values.forEach((value, i) => {
-                const h = value * 4;
+    for i, val in enumerate(a):
+        bar = js.document.createElement("div")
+        bar.classList.add("bar")
+        bar.style.height = f"{val * 4}px"
 
-                /* Gradiente arcoiris suave */
-                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                gradient.addColorStop(0, `hsl(${i * 3}, 100%, 60%)`);
-                gradient.addColorStop(1, `hsl(${i * 3 + 40}, 100%, 30%)`);
+        if highlight is not None and (i == highlight[0] or i == highlight[1]):
+            bar.classList.add("swap" if swap else "highlight")
 
-                ctx.fillStyle = gradient;
-                ctx.fillRect(i * width, canvas.height - h, width - 2, h);
-            });
-        }
+        container.appendChild(bar)
 
-        /* ------------ GENERAR ------------ */
-        function generate() {
-            valores = Array.from(
-                { length: 150 },
-                () => Math.floor(Math.random() * 120 + 10)
-            );
-            draw(valores);
-        }
+render_array(items)
 
-        /* ------------ INICIAR ------------ */
-        async function start() {
-            if (!valores.length) return;
-
-            running = true;
-
-            const alg = document.getElementById("algorithm").value;
-            const path = `algorithms/sort_${alg}.py`;
-
-            const res = await fetch(path);
-            const pyScript = await res.text();
-
-            await pyodide.runPythonAsync(pyScript);
-
-            pyodide.globals.get("init")(valores);
-
-            loop();
-        }
-
-        async function loop() {
-            while (running) {
-                const updated = pyodide.globals.get("step")();
-                draw(updated);
-                await new Promise(r => setTimeout(r, 20));
-            }
-        }
-
-        function pause() {
-            running = false;
-        }
-
-        function reset() {
-            running = false;
-            draw(valores);
-        }
-    </script>
-
-</body>
-</html>
+# -------------------------
+# Cargar algoritmo dinámico
+# -------------------------
+async def load_algorithm(name):
+    url = f"./algorithms/{name}.py"
+    response = await pyfetch(url)
+    
+    code = await response.text()
+    
+    module_name = f"algor_
