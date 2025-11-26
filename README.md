@@ -1,7 +1,7 @@
 # TP – Visualización de Algoritmos
 
 ## Integrantes
-- [Moreyra Milagros, Carrizo Octavio y Ibañez Tiago]
+- [Moreyra Milagros, Ibañez Tiago y Carrizo Octavio]
 
 ## Algoritmos implementados
 - Bubble Sort (sort_bubble.py)
