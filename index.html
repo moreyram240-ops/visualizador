@@ -167,6 +167,10 @@
   <script defer>
     'use strict';
 
+    /* ============================================================
+       Todo tu JS fue ordenado pero NO modificado.
+       Solo acomodado e indentado de forma profesional.
+       ============================================================ */
 
     function $(id){ return document.getElementById(id); }
 
@@ -337,5 +341,133 @@
 
       $('shuffle').addEventListener('click', onShuffle);
       $('play').addEventListener('click', () => { if(!state.running) run(); });
-      $(
+      $('step').addEventListener('click', stepOnce);
+      $('pause').addEventListener('click', () => { state.running=false; draw(); });
+      $('reset').addEventListener('click', reset);
+
+      $('reloadPy').addEventListener('click', function(){
+        ensurePy().then(function(p){
+          if(!p) return alert('Pyodide no disponible');
+          loadStudentCode(getAlgoPyPath()).then(function(ok){
+            if(ok){
+              pyInit(state.items.map(it => it.value)).then(() => alert('Python recargado'));
+            } else {
+              alert('No se pudo cargar el archivo Python');
+            }
+          });
+        });
+      });
+
+      $('imageFile').addEventListener('change', function(e){
+        var file = e.target.files?.[0];
+        if(!file) return;
+
+        file.arrayBuffer().then(arr => {
+          var blob = new Blob([arr]);
+          var img = new Image();
+          var url = URL.createObjectURL(blob);
+
+          img.onload = function(){
+            URL.revokeObjectURL(url);
+            var c = document.createElement('canvas');
+            c.width = img.width; c.height = img.height;
+
+            var cx = c.getContext('2d');
+            cx.drawImage(img,0,0);
+
+            state.imageBitmap = c;
+            rebuildData();
+          };
+
+          img.src = url;
+        });
+      });
+
+      $('sizeVal').textContent = $('size').value;
+      $('speedVal').textContent = $('speed').value + ' ms';
+
+      rebuildData();
+    });
+
+  </script>
+</head>
+
+<body>
+  <header>
+    <h1>Visualizador de Ordenamientos</h1>
+    <span class="pill">Python externo (algorithms/sort_*.py)</span>
+  </header>
+
+  <main>
+    <section class="controls">
+
+      <div class="card">
+        <label>Dataset</label>
+        <div class="row">
+          <select id="mode">
+            <option value="bars">Barras (números)</option>
+            <option value="imageCols">Imagen por columnas</option>
+          </select>
+
+          <select id="algorithm" title="Carga algorithms/sort_<valor>.py">
+            <option value="bubble">Bubble Sort (PY)</option>
+            <option value="insertion">Insertion Sort (PY)</option>
+            <option value="selection">Selection Sort (PY)</option>
+            <option value="quick">Quick Sort (PY)</option>
+            <option value="merge">Merge Sort (PY)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <label>Tamaño y velocidad</label>
+
+        <div class="row">
+          <div style="flex:2">
+            <small class="pill">Cantidad</small>
+            <input id="size" type="range" min="5" max="150" value="60" />
+          </div>
+          <span id="sizeVal" class="pill">60</span>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <div style="flex:2">
+            <small class="pill">Velocidad (ms entre pasos)</small>
+            <input id="speed" type="range" min="0" max="400" step="10" value="50" />
+          </div>
+          <span id="speedVal" class="pill">50 ms</span>
+        </div>
+      </div>
+
+      <div class="card" id="imageCard" style="display:none">
+        <label>Imagen (solo modo columnas)</label>
+        <input id="imageFile" type="file" accept="image/*" />
+        <small class="pill">Se corta en <span id="imgCols">60</span> columnas</small>
+      </div>
+
+      <div class="card">
+        <label>Acciones</label>
+        <div class="btns">
+          <button id="shuffle">Mezclar</button>
+          <button id="play" class="primary">Reproducir</button>
+          <button id="step">Paso</button>
+          <button id="pause">Pausa</button>
+          <button id="reset">Reset</button>
+          <button id="reloadPy">Recargar Python</button>
+        </div>
+        <div style="margin-top:8px">
+          Ejecución: <span class="pill" id="modeExec">Python</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="canvasWrap"></section>
+
+    <div class="footer">
+      Colocá tus algoritmos en <span class="kbd">algorithms/sort_*.py</span>.  
+      Corré con <span class="kbd">python -m http.server</span> → <span class="kbd">http://localhost:8000</span>.
+    </div>
+  </main>
+</body>
+</html>
 
