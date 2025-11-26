@@ -67,17 +67,8 @@ Luego, ingresar a:
 
 ```
 http://localhost:8000
+
 ```
-
----
-
-## Agregar los algoritmos
-1. Copiá `algorithms/sort_template.py` con otro nombre:  
-   `sort_mi_algoritmo.py`
-2. Implementá tu lógica dentro de `init()` y `step()`.
-3. Agregá tu opción en el selector del `index.html`.
-
----
 
 ## Personalización visual
 El proyecto incluye:
