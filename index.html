@@ -4,394 +4,380 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Visualizador de Ordenamientos — Python externo</title>
-
   <style>
-    /* === VARIABLES === */
-    :root {
-      --bg: #006666;
-      --panel: #111827;
-      --muted: #94a3b8;
-      --text: #e2e8f0;
-      --accent: #22d3ee;
-    }
-
-    * { box-sizing: border-box; }
-
-    /* === GENERAL === */
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial;
-      background: linear-gradient(180deg, #0b1220, var(--bg));
-      color: var(--text);
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #1f2937;
-      background: rgba(17, 24, 39, .75);
-      backdrop-filter: blur(6px);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    h1 {
-      font-size: 18px;
-      margin: 0;
-      letter-spacing: .3px;
-    }
-
-    .pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #1f2937;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    main {
-      padding: 12px 16px 20px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 12px;
-    }
-
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 10px;
-      width: 100%;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      padding: 12px;
-    }
-
-    label {
-      font-size: 12px;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    select,
-    input[type=range],
-    input[type=file] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #334155;
-      background: #0b1220;
-      color: var(--text);
-    }
-
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .row > * { flex: 1; }
-
-    .btns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    button {
-      background: #ffcc99;
-      color: var(--text);
-      border: 1px solid #334155;
-      padding: 10px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform .06s ease, border-color .2s ease;
-    }
-
-    button:hover { border-color: var(--accent); }
-    button:active { transform: translateY(1px); }
-
-    button.primary {
-      border-color: var(--accent);
-      box-shadow: inset 0 0 0 1px var(--accent);
-    }
-
-    #canvasWrap {
-      background: #0b1220;
-      border: 1px dashed #334155;
-      border-radius: 16px;
-      padding: 10px;
-      position: relative;
-    }
-
-    #view {
-      width: 100%;
-      height: 64vh;
-      display: block;
-      border-radius: 10px;
-      background:
-        radial-gradient(1000px 500px at 20% -10%, rgba(34,211,238,.08), transparent 70%),
-        radial-gradient(900px 500px at 80% 110%, rgba(167,139,250,.08), transparent 70%),
-        #0a0f1d;
-    }
-
-    .footer {
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-      padding: 8px 0;
-    }
-
-    .kbd {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      background: #0b1220;
-      border: 1px solid #334155;
-      padding: 2px 6px;
-      border-radius: 6px;
-    }
+    :root { --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e2e8f0; --accent:#22d3ee; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial;background:linear-gradient(180deg,#0b1220,var(--bg));color:var(--text);min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+    header{padding:16px 20px;border-bottom:1px solid #1f2937;background:rgba(17,24,39,.75);backdrop-filter:blur(6px);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    h1{font-size:18px;margin:0;letter-spacing:.3px}
+    .pill{padding:4px 10px;border-radius:999px;background:#1f2937;color:var(--muted);font-size:12px}
+    main{padding:12px 16px 20px;display:grid;grid-template-rows:auto 1fr auto;gap:12px}
+    .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;width:100%}
+    .card{background:var(--panel);border:1px solid #1f2937;border-radius:14px;padding:12px}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    select,input[type=range],input[type=file]{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--text)}
+    .row{display:flex;align-items:center;gap:10px}
+    .row>*{flex:1}
+    .btns{display:flex;flex-wrap:wrap;gap:10px}
+    button{background:#0b1220;color:var(--text);border:1px solid #334155;padding:10px 14px;border-radius:12px;cursor:pointer;transition:transform .06s ease,border-color .2s ease}
+    button:hover{border-color:var(--accent)}
+    button:active{transform:translateY(1px)}
+    button.primary{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+    #canvasWrap{background:#0b1220;border:1px dashed #334155;border-radius:16px;padding:10px;position:relative}
+    #view{width:100%;height:64vh;display:block;border-radius:10px;background:radial-gradient(1000px 500px at 20% -10%,rgba(34,211,238,.08),transparent 70%),radial-gradient(900px 500px at 80% 110%,rgba(167,139,250,.08),transparent 70%),#0a0f1d}
+    .footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#0b1220;border:1px solid #334155;padding:2px 6px;border-radius:6px}
   </style>
-
-  <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js" defer></script>
-
   <script defer>
-    'use strict';
+  'use strict';
 
-    /* ============================================================
-       Todo tu JS fue ordenado pero NO modificado.
-       Solo acomodado e indentado de forma profesional.
-       ============================================================ */
+  function $(id){ return document.getElementById(id); }
 
-    function $(id){ return document.getElementById(id); }
+  var canvas = null, ctx = null, DPR = 1;
+  function ensureCanvas(){
+    var wrap = $('canvasWrap');
+    if(!canvas){
+      canvas = document.createElement('canvas');
+      canvas.id = 'view';
+      wrap.appendChild(canvas);
+    }
+    DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    var rect = wrap.getBoundingClientRect();
+    canvas.width  = Math.floor(rect.width * DPR);
+    canvas.height = Math.floor(rect.height * DPR);
+    canvas.style.width  = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+  }
+  window.addEventListener('resize', function(){ ensureCanvas(); draw(); });
 
-    var canvas = null, ctx = null, DPR = 1;
+  function clearCanvas(){
+    if(!ctx) return;
+    ctx.save();
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.restore();
+  }
 
-    function ensureCanvas() {
-      var wrap = $('canvasWrap');
-      if (!canvas) {
-        canvas = document.createElement('canvas');
-        canvas.id = 'view';
-        wrap.appendChild(canvas);
+  // Reparte 'total' en 'n' enteros que suman exactamente 'total'
+  function columnWidths(n, total){
+    var widths = new Array(n), accPrev = 0;
+    for(var i=0;i<n;i++){
+      var accNext = Math.round(((i+1) * total) / n);
+      widths[i] = accNext - accPrev;
+      accPrev = accNext;
+    }
+    return widths;
+  }
+
+  // ===== Estado =====
+  var state = {
+    mode: 'bars',
+    items: [],
+    original: [],
+    running: false,
+    speed: 50,
+    highlight: {a:null,b:null},
+    imageBitmap: null
+  };
+
+  // ===== Helpers =====
+  function randInt(min,max){ return (Math.random()*(max-min+1)+min)|0; }
+  function shuffleArray(a){ for(var i=a.length-1;i>0;i--){ var j=randInt(0,i), t=a[i]; a[i]=a[j]; a[j]=t; } }
+
+  // ===== Barras =====
+  function makeBars(n){
+    var vals = new Array(n);
+    for(var i=0;i<n;i++) vals[i]=i+1;
+    shuffleArray(vals);
+    var out = new Array(n);
+    for(var k=0;k<n;k++) out[k]={ value: vals[k], originalIndex: vals[k]-1 };
+    return out;
+  }
+
+  // ===== Imagen por columnas =====
+  function makeImageColumns(n){
+    return new Promise(function(resolve){
+      if(!state.imageBitmap){
+        var off = document.createElement('canvas');
+        off.width = 800; off.height = 500;
+        var octx = off.getContext('2d');
+        octx.imageSmoothingEnabled = false;
+        var grad = octx.createLinearGradient(0,0,off.width,off.height);
+        grad.addColorStop(0,'#38bdf8'); grad.addColorStop(1,'#a78bfa');
+        octx.fillStyle = grad; octx.fillRect(0,0,off.width,off.height);
+        state.imageBitmap = off; // canvas fuente
+      }
+      var img = state.imageBitmap, W = img.width, H = img.height;
+      var colW = Math.max(1, Math.floor(W / n));
+      var pieces = [];
+      for(var i=0;i<n;i++){
+        var slice = document.createElement('canvas');
+        slice.width = colW; slice.height = H;
+        var sctx = slice.getContext('2d');
+        sctx.imageSmoothingEnabled = false;
+        sctx.drawImage(img, i*colW,0,colW,H, 0,0,colW,H);
+        pieces.push({ originalIndex:i, slice:slice });
+      }
+      shuffleArray(pieces);
+      var out = new Array(n);
+      for(var j=0;j<n;j++) out[j] = { value: pieces[j].originalIndex, bitmap: pieces[j].slice, originalIndex: pieces[j].originalIndex };
+      resolve(out);
+    });
+  }
+
+  // ===== Dibujo =====
+  function draw(){
+    if(!ctx) return;
+    clearCanvas();
+
+    var W = canvas.width, H = canvas.height;
+
+    if(state.mode === 'bars'){
+      var n = state.items.length; if(!n) return;
+      var gap = Math.round(2 * DPR);
+      var usable = W - gap*(n+1);
+      if (usable < 1) return;
+
+      var widths = columnWidths(n, usable);
+      var maxVal = 1;
+      for(var i=0;i<n;i++) if(state.items[i].value > maxVal) maxVal = state.items[i].value;
+
+      var x = gap;
+      for(var k=0;k<n;k++){
+        var it = state.items[k];
+        var w  = widths[k] | 0;
+        var h  = Math.max(2*DPR, (it.value/maxVal) * (H - 10*DPR)) | 0;
+        var y  = (H - h) | 0;
+        var hi = (state.highlight.a===k || state.highlight.b===k);
+        ctx.fillStyle = hi ? '#22d3ee' : '#334155';
+        ctx.fillRect(x|0, y|0, w|0, h|0);
+        x += w + gap;
       }
 
-      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      var rect = wrap.getBoundingClientRect();
+    } else {
+      var n2 = state.items.length; if(!n2) return;
+      var Himg = Math.floor(canvas.height * 0.9);
+      var src = state.imageBitmap;
+      var ratio = src ? (src.width/src.height) : (16/9);
+      var Wimg = Math.floor(Himg * ratio);
+      var startX = Math.floor((canvas.width - Wimg)/2);
+      var startY = Math.floor((canvas.height - Himg)/2);
 
-      canvas.width = Math.floor(rect.width * DPR);
-      canvas.height = Math.floor(rect.height * DPR);
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
+      var widths2 = columnWidths(n2, Wimg);
+      var x2 = startX;
 
-      ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = false;
-    }
 
-    window.addEventListener('resize', () => { ensureCanvas(); draw(); });
-
-    function clearCanvas() {
-      if (!ctx) return;
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.restore();
-    }
-
-    function columnWidths(n, total) {
-      var widths = new Array(n), accPrev = 0;
-      for (var i = 0; i < n; i++) {
-        var accNext = Math.round(((i + 1) * total) / n);
-        widths[i] = accNext - accPrev;
-        accPrev = accNext;
+      for(var m=0;m<n2;m++){
+        var bmp = state.items[m].bitmap;
+        var w2  = widths2[m] | 0;
+        var xx  = x2 | 0;
+        var yy  = startY | 0;
+        ctx.drawImage(bmp, 0,0,bmp.width,bmp.height, xx,yy, w2, Himg);
+        if(state.highlight.a===m || state.highlight.b===m){
+          ctx.strokeStyle='#22d3ee'; ctx.lineWidth=2*DPR;
+          ctx.strokeRect(xx+1*DPR,yy+1*DPR,w2-2*DPR,Himg-2*DPR);
+        }
+        x2 += w2;
       }
-      return widths;
     }
+  }
 
-    /* ===== Estado global ===== */
-    var state = {
-      mode: 'bars',
-      items: [],
-      original: [],
-      running: false,
-      speed: 50,
-      highlight: { a: null, b: null },
-      imageBitmap: null
+  // ===== Pyodide =====
+  var py = null, pyStepFn = null;
+  function ensurePy(){
+    return new Promise(function(resolve){
+      if(py){ resolve(py); return; }
+      loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.0/full/' })
+        .then(function(p){ py = p; resolve(py); })
+        .catch(function(e){ console.warn('Pyodide no disponible:', e); resolve(null); });
+    });
+  }
+  function loadStudentCode(path){
+    return fetch(path, { cache:'no-store' })
+      .then(function(r){ if(!r.ok) throw new Error('fetch '+path+' '+r.status); return r.text(); })
+      .then(function(code){ return py.runPythonAsync(code).then(function(){ return true; }); })
+      .catch(function(e){ console.warn('Error cargando .py:', e); return false; });
+  }
+  function pyInit(values){
+    if(!py) return Promise.resolve();
+    py.globals.set('initial_values', values);
+    return py.runPythonAsync('init(initial_values)').then(function(){
+      pyStepFn = py.globals.get('step');
+    });
+  }
+  function pyStep(){
+    if(!pyStepFn) return { done:true };
+    var res = pyStepFn();
+    try { return res.toJs({ dict_converter: Object.fromEntries }); }
+    finally { if(res && res.destroy) res.destroy(); }
+  }
+
+  // ===== Utilidades =====
+  function getAlgoPyPath(){
+    var name = $('algorithm').value.toLowerCase().replace(/[^a-z0-9_]/g,'');
+    return 'algorithms/sort_' + name + '.py';
+  }
+
+  // ===== Control =====
+  function rebuildData(){
+    var n = parseInt($('size').value, 10);
+    $('imgCols').textContent = String(n);
+    $('imageCard').style.display = state.mode === 'imageCols' ? '' : 'none';
+
+    // dataset y dibujo primero (para ver siempre algo)
+    var afterData = function(){
+      state.original = JSON.parse(JSON.stringify(state.items));
+      state.highlight = {a:null,b:null};
+      draw();
+
+      // intentar leer Python
+      ensurePy().then(function(p){
+        if(!p){ $('modeExec').textContent = 'Demo JS'; return; }
+        var path = getAlgoPyPath();
+        loadStudentCode(path).then(function(ok){
+          if(ok){
+            pyInit(state.items.map(function(it){return it.value;})).then(function(){
+              $('modeExec').textContent = 'Python: ' + path;
+            });
+          } else {
+            $('modeExec').textContent = 'Demo JS';
+          }
+        });
+      });
     };
 
-    /* === Helpers === */
-    function randInt(min, max){ return (Math.random()*(max-min+1)+min)|0; }
-
-    function shuffleArray(a){
-      for (var i=a.length-1; i>0; i--){
-        var j = randInt(0, i);
-        var t=a[i]; a[i]=a[j]; a[j]=t;
-      }
-    }
-
-    /* === Dataset barra === */
-    function makeBars(n){
-      var vals = new Array(n);
-      for(var i=0;i<n;i++) vals[i] = i+1;
-      shuffleArray(vals);
-
-      var out = new Array(n);
-      for(var k=0;k<n;k++){
-        out[k] = { value: vals[k], originalIndex: vals[k]-1 };
-      }
-      return out;
-    }
-
-    /* === Dataset por columnas de imagen === */
-    function makeImageColumns(n){
-      return new Promise(function(resolve){
-        if(!state.imageBitmap){
-          var off = document.createElement('canvas');
-          off.width = 800; off.height = 500;
-
-          var octx = off.getContext('2d');
-          octx.imageSmoothingEnabled = false;
-
-          var grad = octx.createLinearGradient(0,0,off.width,off.height);
-          grad.addColorStop(0,'#38bdf8');
-          grad.addColorStop(1,'#a78bfa');
-
-          octx.fillStyle = grad;
-          octx.fillRect(0,0,off.width,off.height);
-
-          state.imageBitmap = off;
-        }
-
-        var img = state.imageBitmap,
-            W = img.width,
-            H = img.height,
-            colW = Math.max(1, Math.floor(W / n));
-
-        var pieces = [];
-
-        for (var i=0; i<n; i++){
-          var slice = document.createElement('canvas');
-          slice.width = colW;
-          slice.height = H;
-
-          var sctx = slice.getContext('2d');
-          sctx.drawImage(img, i*colW,0, colW,H, 0,0, colW,H);
-
-          pieces.push({ originalIndex:i, slice:slice });
-        }
-
-        shuffleArray(pieces);
-
-        var out = pieces.map(p => ({
-          value: p.originalIndex,
-          bitmap: p.slice,
-          originalIndex: p.originalIndex
-        }));
-
-        resolve(out);
+    if(state.mode === 'bars'){
+      state.items = makeBars(n);
+      afterData();
+    } else {
+      makeImageColumns(n).then(function(items){
+        state.items = items;
+        afterData();
       });
     }
+  }
 
-    /* === Dibujo === */
-    function draw(){ /* ... SE MANTIENE IGUAL ... */ }
-
-    /* === Pyodide === */
-    var py = null, pyStepFn = null;
-
-    function ensurePy(){ /* ... */ }
-    function loadStudentCode(path){ /* ... */ }
-    function pyInit(values){ /* ... */ }
-    function pyStep(){ /* ... */ }
-
-    /* === Control === */
-    function rebuildData(){ /* ... */ }
-    function onShuffle(){ /* ... */ }
-    function run(){ /* ... */ }
-    function stepOnce(){ /* ... */ }
-    function reset(){ /* ... */ }
-
-    /* === Listeners === */
-    document.addEventListener('DOMContentLoaded', function(){
-      ensureCanvas();
-
-      $('mode').addEventListener('change', function(){
-        state.mode = this.value;
-        rebuildData();
-      });
-
-      $('algorithm').addEventListener('change', rebuildData);
-
-      $('size').addEventListener('input', function(){
-        $('sizeVal').textContent = this.value;
-        rebuildData();
-      });
-
-      $('speed').addEventListener('input', function(){
-        $('speedVal').textContent = this.value + ' ms';
-        state.speed = parseInt(this.value,10);
-      });
-
-      $('shuffle').addEventListener('click', onShuffle);
-      $('play').addEventListener('click', () => { if(!state.running) run(); });
-      $('step').addEventListener('click', stepOnce);
-      $('pause').addEventListener('click', () => { state.running=false; draw(); });
-      $('reset').addEventListener('click', reset);
-
-      $('reloadPy').addEventListener('click', function(){
-        ensurePy().then(function(p){
-          if(!p) return alert('Pyodide no disponible');
-          loadStudentCode(getAlgoPyPath()).then(function(ok){
-            if(ok){
-              pyInit(state.items.map(it => it.value)).then(() => alert('Python recargado'));
-            } else {
-              alert('No se pudo cargar el archivo Python');
-            }
-          });
+  function onShuffle(){
+    var after = function(){
+      state.original = JSON.parse(JSON.stringify(state.items));
+      state.highlight = {a:null,b:null};
+      draw();
+      ensurePy().then(function(p){
+        if(!p) return;
+        loadStudentCode(getAlgoPyPath()).then(function(ok){
+          if(ok) pyInit(state.items.map(function(it){return it.value;}));
         });
       });
+    };
+    if(state.mode === 'bars'){
+      shuffleArray(state.items); after();
+    } else {
+      makeImageColumns(state.items.length).then(function(items){
+        state.items = items; after();
+      });
+    }
+  }
 
-      $('imageFile').addEventListener('change', function(e){
-        var file = e.target.files?.[0];
-        if(!file) return;
+  function run(){
+    if(!pyStepFn) return;
+    state.running = true;
+    (function loop(){
+      if(!state.running) return;
+      var t0 = performance.now();
+      var act = pyStep();
+      if(act.done){
+        state.running=false;
+        state.highlight = {a:null,b:null};
+        draw();
+        return;
+      }
+      state.highlight = { a: act.a, b: act.b };
+      if(act.swap){
+        var a=act.a, b=act.b, tmp=state.items[a];
+        state.items[a]=state.items[b]; state.items[b]=tmp;
+      }
+      draw();
+      var wait = Math.max(5, parseInt($('speed').value,10) - (performance.now()-t0)); // 👈 mínimo 5ms
+      setTimeout(loop, wait);
+    })();
+  }
+  function stepOnce(){
+    if(!pyStepFn) return;
+    var act = pyStep();
+    if(act.done){
+      state.running=false;
+      state.highlight = {a:null,b:null};
+      draw();
+      return;
+    }
+    state.highlight = { a: act.a, b: act.b };
+    if(act.swap){
+      var a=act.a, b=act.b, tmp=state.items[a];
+      state.items[a]=state.items[b]; state.items[b]=tmp;
+    }
+    draw();
+  }
+  function reset(){
+    state.running=false;
+    state.highlight = {a:null,b:null};
+    state.items = JSON.parse(JSON.stringify(state.original));
+    draw();
+  }
 
-        file.arrayBuffer().then(arr => {
-          var blob = new Blob([arr]);
-          var img = new Image();
-          var url = URL.createObjectURL(blob);
+  // ===== listeners del pool =====
+  document.addEventListener('DOMContentLoaded', function(){
+    ensureCanvas();
 
-          img.onload = function(){
-            URL.revokeObjectURL(url);
-            var c = document.createElement('canvas');
-            c.width = img.width; c.height = img.height;
+    $('mode').addEventListener('change', function(){ state.mode = this.value; rebuildData(); });
+    $('algorithm').addEventListener('change', function(){ rebuildData(); });
 
-            var cx = c.getContext('2d');
-            cx.drawImage(img,0,0);
+    $('size').addEventListener('input', function(){ $('sizeVal').textContent = String(this.value); rebuildData(); });
+    $('speed').addEventListener('input', function(){ $('speedVal').textContent = String(this.value)+' ms'; state.speed = parseInt(this.value,10); });
 
-            state.imageBitmap = c;
-            rebuildData();
-          };
-
-          img.src = url;
+    $('shuffle').addEventListener('click', function(){ onShuffle(); });
+    $('play').addEventListener('click', function(){ if(!state.running) run(); });
+    $('pause').addEventListener('click', function(){
+      state.running=false;
+      state.highlight = {a:null,b:null};
+      draw();
+    });
+    $('step').addEventListener('click', function(){ stepOnce(); });
+    $('reset').addEventListener('click', function(){ reset(); });
+    $('reloadPy').addEventListener('click', function(){
+      ensurePy().then(function(p){
+        if(!p) return alert('Pyodide no disponible');
+        loadStudentCode(getAlgoPyPath()).then(function(ok){
+          if(ok){ pyInit(state.items.map(function(it){return it.value;})).then(function(){ alert('Python recargado'); }); }
+          else { alert('No se pudo cargar el .py'); }
         });
       });
-
-      $('sizeVal').textContent = $('size').value;
-      $('speedVal').textContent = $('speed').value + ' ms';
-
-      rebuildData();
     });
 
+    $('imageFile').addEventListener('change', function(e){
+      var files = e && e.target ? e.target.files : null;
+      var file = files && files[0]; if(!file) return;
+      file.arrayBuffer().then(function(arr){
+        var blob = new Blob([arr]); var img = new Image(); var url = URL.createObjectURL(blob);
+        img.onload = function(){ URL.revokeObjectURL(url);
+          var c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+          var cctx = c.getContext('2d'); cctx.imageSmoothingEnabled = false;
+          cctx.drawImage(img,0,0); state.imageBitmap = c; rebuildData();
+        };
+        img.src = url;
+      });
+    });
+
+    $('sizeVal').textContent = $('size').value;
+    $('speedVal').textContent = $('speed').value + ' ms';
+    rebuildData();
+  });
   </script>
 </head>
-
 <body>
   <header>
     <h1>Visualizador de Ordenamientos</h1>
@@ -400,28 +386,26 @@
 
   <main>
     <section class="controls">
-
       <div class="card">
         <label>Dataset</label>
         <div class="row">
           <select id="mode">
             <option value="bars">Barras (números)</option>
-            <option value="imageCols">Imagen por columnas</option>
+            <option value="imageCols">Imagen por columnas (extensión)</option>
           </select>
-
           <select id="algorithm" title="Carga algorithms/sort_<valor>.py">
             <option value="bubble">Bubble Sort (PY)</option>
             <option value="insertion">Insertion Sort (PY)</option>
             <option value="selection">Selection Sort (PY)</option>
             <option value="quick">Quick Sort (PY)</option>
-            <option value="merge">Merge Sort (PY)</option>
+<option value="merge">Merge Sort (PY)</option>
+
           </select>
         </div>
       </div>
 
       <div class="card">
         <label>Tamaño y velocidad</label>
-
         <div class="row">
           <div style="flex:2">
             <small class="pill">Cantidad</small>
@@ -429,7 +413,6 @@
           </div>
           <span id="sizeVal" class="pill">60</span>
         </div>
-
         <div class="row" style="margin-top:8px">
           <div style="flex:2">
             <small class="pill">Velocidad (ms entre pasos)</small>
@@ -440,9 +423,9 @@
       </div>
 
       <div class="card" id="imageCard" style="display:none">
-        <label>Imagen (solo modo columnas)</label>
+        <label>Imagen (solo en modo “Imagen por columnas”)</label>
         <input id="imageFile" type="file" accept="image/*" />
-        <small class="pill">Se corta en <span id="imgCols">60</span> columnas</small>
+        <small class="pill">Se corta en <span id="imgCols">60</span> columnas y se ordena por índice original.</small>
       </div>
 
       <div class="card">
@@ -455,19 +438,16 @@
           <button id="reset">Reset</button>
           <button id="reloadPy">Recargar Python</button>
         </div>
-        <div style="margin-top:8px">
-          Ejecución: <span class="pill" id="modeExec">Python</span>
-        </div>
+        <div style="margin-top:8px">Ejecución: <span class="pill" id="modeExec">Python</span></div>
       </div>
     </section>
 
     <section id="canvasWrap"></section>
 
     <div class="footer">
-      Colocá tus algoritmos en <span class="kbd">algorithms/sort_*.py</span>.  
-      Corré con <span class="kbd">python -m http.server</span> → <span class="kbd">http://localhost:8000</span>.
+      Colocá tus algoritmos en <span class="kbd">algorithms/sort_*.py</span> con <span class="kbd">init(vals)</span> y <span class="kbd">step()</span>. Inicia con
+      <span class="kbd">python -m http.server</span> y abrí <span class="kbd">http://localhost:8000</span>.
     </div>
   </main>
 </body>
 </html>
-
