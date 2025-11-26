@@ -1,52 +1,49 @@
-# sort_bubble.py
-# Bubble Sort - implementación paso-a-paso para el visualizador
+# sort_selection.py
+# Selection Sort paso a paso
 
 items = []
+i = 0
+j = 0
+min_index = 0
 n = 0
-i = 0      # cantidad de pasadas completas
-j = 0      # índice actual dentro de la pasada
-comparisons = 0
-swaps = 0
 
 def init(vals):
-    global items, n, i, j, comparisons, swaps
+    global items, i, j, min_index, n
     items = list(vals)
     n = len(items)
     i = 0
-    j = 0
-    comparisons = 0
-    swaps = 0
+    j = 1
+    min_index = 0
 
 def step():
-    global items, n, i, j, comparisons, swaps
+    global items, i, j, min_index, n
 
-    if n <= 1 or i >= n - 1:
-        # terminado
+    if i >= n - 1:
         return {"done": True}
 
-    a = j
-    b = j + 1
+    a = min_index
+    b = j
+    swapped = False
 
-    # seguridad: índices válidos
-    if b >= n:
-        # avanzar fase si por alguna razón j quedó fuera
-        j = 0
-        i += 1
-        return {"a": 0, "b": 0, "swap": False, "done": False}
+    # Comparar
+    if items[j] < items[min_index]:
+        min_index = j
 
-    comparisons += 1
-    if items[a] > items[b]:
-        # hacer swap en la lista primero
-        items[a], items[b] = items[b], items[a]
-        swaps += 1
-        swapped = True
-    else:
-        swapped = False
-
-    # avanzar j; si fin de pasada, reiniciar j y aumentar i
     j += 1
-    if j >= n - i - 1:
-        j = 0
-        i += 1
 
-    return {"a": a, "b": b, "swap": swapped, "done": False}
+    # Si terminó la búsqueda del mínimo, hacer swap
+    if j >= n:
+        if min_index != i:
+            items[i], items[min_index] = items[min_index], items[i]
+            swapped = True
+
+        i += 1
+        min_index = i
+        j = i + 1
+
+    return {
+        "a": a,
+        "b": b,
+        "swap": swapped,
+        "done": False
+    }
