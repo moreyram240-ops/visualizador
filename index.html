@@ -7,208 +7,62 @@
   <title>Visualizador de Ordenamientos — Python externo</title>
   <style>
 /* ============================================================
-   Paleta moderna (Dark Neon UI)
+   THEME SYSTEM — Light + Dark con transición suave
    ============================================================ */
+
 :root {
+  --transition: 0.35s ease;
+
+  /* Default (Dark mode) */
   --bg: #0b0f17;
   --panel: #11131f;
-  --panel-glass: rgba(255, 255, 255, 0.04);
+  --panel-glass: rgba(255, 255, 255, 0.05);
   --text: #e5e9f0;
   --muted: #8b9ab3;
-
-  --accent: #4deaff;      /* cyan neon */
-  --accent2: #b37bff;     /* purple neon */
+  --accent: #4deaff;
+  --accent2: #b37bff;
   --accent-glow: 0 0 12px rgba(77, 234, 255, 0.6);
+
+  /* Transition global */
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 /* ============================================================
-   Reset
+   Tema CLARO
+   Se activa cuando <html data-theme="light">
    ============================================================ */
-* { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto;
-  background: radial-gradient(circle at 20% 10%, #142033, #080c14 60%);
-  color: var(--text);
-  min-height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr;
+html[data-theme="light"] {
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --panel-glass: rgba(0, 0, 0, 0.04);
+  --text: #1a1c1f;
+  --muted: #5c6572;
+
+  --accent: #00aaff;
+  --accent2: #8b5bff;
+  --accent-glow: 0 0 10px rgba(0, 170, 255, 0.4);
 }
 
 /* ============================================================
-   Header con marquesina Glow
+   Modo automático (según el SO)
    ============================================================ */
-header {
-  padding: 18px 22px;
-  background: var(--panel-glass);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  backdrop-filter: blur(10px);
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  animation: headerGlow 5s infinite alternate ease-in-out;
-}
 
-@keyframes headerGlow {
-  from { box-shadow: 0 0 0px rgba(77,234,255,0.0); }
-  to { box-shadow: 0 0 18px rgba(77,234,255,0.3); }
-}
-
-h1 {
-  font-size: 20px;
-  letter-spacing: .5px;
-  font-weight: 600;
-}
-
-/* ============================================================
-   Pills / etiquetas
-   ============================================================ */
-.pill {
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--muted);
-  font-size: 12px;
-}
-
-/* ============================================================
-   Contenido
-   ============================================================ */
-main {
-  padding: 18px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 14px;
-}
-
-/* Grilla de controles */
-.controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 12px;
-}
-
-/* ============================================================
-   Tarjetas con efecto Glass
-   ============================================================ */
-.card {
-  background: var(--panel-glass);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 14px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 22px rgba(0,0,0,0.25);
-  transition: transform .15s ease, border-color .2s ease;
-}
-
-.card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-
-/* ============================================================
-   Formularios
-   ============================================================ */
-label {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
-  display: block;
-}
-
-select,
-input[type=range],
-input[type=file] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: #0a0f19;
-  color: var(--text);
-  outline: none;
-  transition: border-color .2s ease, box-shadow .2s ease;
-}
-
-select:hover,
-input[type=range]:hover,
-input[type=file]:hover {
-  border-color: var(--accent);
-  box-shadow: var(--accent-glow);
-}
-
-/* ============================================================
-   Botones con marquesina futurista
-   ============================================================ */
-.btns { display: flex; flex-wrap: wrap; gap: 10px; }
-
-button {
-  background: #0b111d;
-  color: var(--text);
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 10px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: border-color .2s, box-shadow .2s, transform .08s;
-}
-
-button:hover {
-  border-color: var(--accent);
-  box-shadow: var(--accent-glow);
-}
-
-button:active {
-  transform: translateY(1px);
-}
-
-button.primary {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 6px var(--accent2);
-}
-
-/* ============================================================
-   Canvas / Visualizador
-   ============================================================ */
-#canvasWrap {
-  background: #0b111d;
-  border: 1px dashed rgba(255,255,255,0.12);
-  border-radius: 16px;
-  padding: 12px;
-  position: relative;
-  animation: neonBorder 4s infinite alternate ease-in-out;
-}
-
-@keyframes neonBorder {
-  0% { box-shadow: 0 0 8px rgba(77,234,255,0.15); }
-  100% { box-shadow: 0 0 18px rgba(179,123,255,0.25); }
-}
-
-#view {
-  width: 100%;
-  height: 64vh;
-  border-radius: 10px;
-  background:
-    radial-gradient(1000px 500px at 20% -10%, rgba(77,234,255,.08), transparent 70%),
-    radial-gradient(900px 500px at 80% 110%, rgba(179,123,255,.08), transparent 70%),
-    #05070d;
-}
-
-/* ============================================================
-   Footer
-   ============================================================ */
-.footer {
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-  padding: 12px 0;
-}
-
-.kbd {
-  font-family: ui-monospace, Menlo, Consolas;
-  background: #0b111d;
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 2px 6px;
-  border-radius: 6px;
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #f5f7fa;
+    --panel: #ffffff;
+    --panel-glass: rgba(0, 0, 0, 0.04);
+    --text: #1a1c1f;
+    --muted: #5c6572;
+    --accent: #009fff;
+    --accent2: #7b4dff;
+    --accent-glow: 0 0 10px rgba(0, 159, 255, 0.4);
+  }
 }
 
     </style>
