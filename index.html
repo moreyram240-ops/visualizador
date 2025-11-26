@@ -2,116 +2,139 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Visualizador de Algoritmos de Ordenamiento</title>
-
-    <!-- PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Algoritmos</title>
 
     <style>
         body {
-            font-family: Arial;
-            background: #f4f4f4;
+            background: #ff9966;
+            color: #ffff00;
+            font-family: garamond, sans-serif;
             margin: 0;
-            padding: 20px;
         }
 
-        h1 {
+        header {
+            background: #663300;
+            padding: 25px;
             text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            border-bottom: 2px solid #30363d;
         }
 
         #controls {
+            padding: 20px;
             display: flex;
+            gap: 20px;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
         }
 
-        #array {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            height: 260px;
-            margin-top: 20px;
+        button, select {
+            background: #660066;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid #ffcc00;
+            cursor: pointer;
+            font-size: 18px;
         }
 
-        .bar {
-            width: 25px;
-            margin: 0 3px;
-            background: steelblue;
-            transition: 0.3s;
-        }
-
-        .highlight {
-            background: orange !important;
-        }
-
-        .swap {
-            background: red !important;
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background: #330000;
+            border: 4px solid #ffcc00;
+            border-radius: 10px;
         }
     </style>
+
+    <!-- Pyodide (NECESARIO para GitHub Pages) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 </head>
+
 <body>
-
-    <h1>Visualizador de Algoritmos de Ordenamiento</h1>
-
-    <div style="text-align: center; margin-bottom: 20px;">
-        <label>Algoritmo:</label>
-        <select id="algoritmo">
-            <option value="sort_bubble">Bubble Sort</option>
-            <option value="sort_selection">Selection Sort</option>
-            <option value="sort_insertion">Insertion Sort</option>
-        </select>
-
-        <button id="btn-iniciar">Iniciar</button>
-    </div>
+    <header>Visualizador de Algoritmos</header>
 
     <div id="controls">
-        <button id="btn-step" disabled>Paso</button>
-        <button id="btn-auto" disabled>Auto</button>
-        <button id="btn-reset" disabled>Reset</button>
+        <select id="algorithm">
+            <option value="bubble">Bubble</option>
+            <option value="insertion">Insertion</option>
+            <option value="selection">Selection</option>
+            <option value="template">Template</option>
+        </select>
+
+        <button onclick="generate()">Generar</button>
+        <button onclick="start()">Iniciar</button>
+        <button onclick="pause()">Pausar</button>
+        <button onclick="reset()">Reiniciar</button>
     </div>
 
-    <div id="array"></div>
+    <canvas id="canvas" width="900" height="500"></canvas>
 
-    <!-- PyScript -->
-    <py-script>
-import js
-from pyodide.http import pyfetch
-import asyncio
-import importlib
+    <script>
+        let valores = [];
+        let running = false;
+        let pyodide;
 
-# Estado
-items = [30, 12, 60, 22, 5, 50, 41, 33]
-alg = None
-auto_running = False
+        async function loadPyodideAndPackages() {
+            pyodide = await loadPyodide();
+        }
+        loadPyodideAndPackages();
 
-# -------------------------
-# Cargar y dibujar barras
-# -------------------------
-def render_array(a, highlight=None, swap=False):
-    container = js.document.getElementById("array")
-    container.innerHTML = ""
+        function draw(values) {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for i, val in enumerate(a):
-        bar = js.document.createElement("div")
-        bar.classList.add("bar")
-        bar.style.height = f"{val * 4}px"
+            const width = canvas.width / values.length;
 
-        if highlight is not None and (i == highlight[0] or i == highlight[1]):
-            bar.classList.add("swap" if swap else "highlight")
+            values.forEach((value, i) => {
+                const h = value * 4;
 
-        container.appendChild(bar)
+                ctx.fillStyle = `hsl(${i * 3}, 100%, 60%)`;
+                ctx.fillRect(i * width, canvas.height - h, width - 2, h);
+            });
+        }
 
-render_array(items)
+        function generate() {
+            valores = Array.from({ length: 150 }, () =>
+                Math.floor(Math.random() * 120 + 10)
+            );
+            draw(valores);
+        }
 
-# -------------------------
-# Cargar algoritmo dinámico
-# -------------------------
-async def load_algorithm(name):
-    url = f"./algorithms/{name}.py"
-    response = await pyfetch(url)
-    
-    code = await response.text()
-    
-    module_name = f"algor_
+        async function start() {
+            running = true;
+
+            const alg = document.getElementById("algorithm").value;
+            const path = `algorithms/sort_${alg}.py`;
+
+            const res = await fetch(path);
+            const pyScript = await res.text();
+
+            await pyodide.runPythonAsync(pyScript);
+
+            pyodide.globals.get("init")(valores);
+
+            loop();
+        }
+
+        async function loop() {
+            while (running) {
+                const updated = pyodide.globals.get("step")();
+                draw(updated);
+                await new Promise(r => setTimeout(r, 20));
+            }
+        }
+
+        function pause() {
+            running = false;
+        }
+
+        function reset() {
+            running = false;
+            draw(valores);
+        }
+    </script>
+</body>
+</html>
