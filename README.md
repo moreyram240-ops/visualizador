@@ -93,6 +93,3 @@ Curso: Introduccion a la programación
 Año: 2025
 
 ---
-
-## 📜 Licencia
-Proyecto educativo — libre para uso académico.
